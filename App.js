@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, Button, Image, Platform, 
-         TouchableWithoutFeedback, Alert } from 'react-native'
+import { View, Text, StyleSheet, Button, Image, Platform } from 'react-native'
 
 import ImagePicker from 'react-native-image-crop-picker'
-import Modal from 'react-native-modal'
+import ActionSheet from 'react-native-actionsheet'
 
 const App = () => {
 
   const [ photo, setPhoto ] = useState('')
   const [ photoSize, setPhotoSize ] = useState(0)
   const [ photoMime, setPhotoMime ] = useState('')
+
+  var refContainer = null
 
   const selectFromGalery = () => {
     ImagePicker.openPicker({
@@ -38,16 +39,7 @@ const App = () => {
   }
 
   const openMenu = () => {
-    Alert.alert(
-      'Escolha uma opção?',
-      '',
-      [
-        { text: 'Cancelar', onPress: () => console.log('Cancel Pressed'), style: 'destructive' },
-        { text: 'Nova foto', onPress: () => openCameraTake(), style: 'cancel' },
-        { text: 'Selecionar foto', onPress: () => selectFromGalery(), style: 'cancel' },
-      ],
-      { cancelable: true }
-    )
+    refContainer.show()
   }
 
   const renderImage = () => {
@@ -63,6 +55,19 @@ const App = () => {
     var txt = Math.round((size / 1024), 2)
 
     return `Tamanho: ${txt} kb`
+  }
+
+  const actionSelectPhoto = (idx) => {
+    switch (idx) {
+      case 0:
+          openCameraTake()
+          break;
+      case 1:
+          selectFromGalery()
+          break;
+      case 2:
+          break;
+    }
   }
 
   return (
@@ -82,6 +87,14 @@ const App = () => {
         </View>
         
       </View>
+
+      <ActionSheet 
+        ref={ ev => refContainer = ev}
+        title={'Selecione uma opção'}
+        options={['Tirar foto', 'Escolher na galeria', 'Cancelar']}
+        cancelButtonIndex={2}
+        destructiveButtonIndex={2}
+        onPress={(index) => { actionSelectPhoto(index) }}/> 
 
       <View style={{flex: 5, marginTop: 60}}>
 
