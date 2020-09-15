@@ -37,6 +37,12 @@
 			</dict>
 		</dict>
 	</dict>
+
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FoodFinder app requires photo library access.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>FoodFinder app requires camera access to take photo.</string>
+	
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UILaunchStoryboardName</key>

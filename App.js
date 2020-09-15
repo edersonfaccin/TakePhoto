@@ -1,73 +1,68 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, Button, Image, Platform } from 'react-native'
+import { View, Text, StyleSheet, Button, Image } from 'react-native'
 
-import ImagePicker from 'react-native-image-crop-picker'
-import ActionSheet from 'react-native-actionsheet'
+import ImagePicker from 'react-native-image-picker'
 
 const App = () => {
 
   const [ photo, setPhoto ] = useState('')
-  const [ photoSize, setPhotoSize ] = useState(0)
-  const [ photoMime, setPhotoMime ] = useState('')
 
-  var refContainer = null
-
-  const selectFromGalery = () => {
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      includeBase64: true,
-      compressImageQuality: Platform.OS === 'ios' ? 0.8 : 0.5
-    }).then(image => {
-      setPhoto(image.data)
-      setPhotoMime(image.mime)
-      setPhotoSize(image.size)
-    })
-  }
-
-  const openCameraTake = () => {
-    ImagePicker.openCamera({
-      width: 300,
-      height: 400,
-      includeBase64: true,
-      compressImageQuality: Platform.OS === 'ios' ? 0.8 : 0.5
-    }).then(image => {
-      setPhoto(image.data)
-      setPhotoMime(image.mime)
-      setPhotoSize(image.size)
-    })
+  const options = {
+    title: 'Selecionar imagem',
+    storageOptions: {
+      skipBackup: true,
+      path: 'images'
+    },
+    maxWidth: 500,
+    maxHeight: 320,
+    quality: 0.5
   }
 
   const openMenu = () => {
-    refContainer.show()
+    ImagePicker.showImagePicker(options, (response) => {
+      console.log('Response = ', response);
+     
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      } else {
+        const source = { uri: response.uri }
+        // You can also display the image using data:
+        // const source = { uri: 'data:image/jpeg;base64,' + response.data }
+        setPhoto(source)
+
+        console.log('fileSize', response.fileSize)
+      }
+    })
+  }
+
+  const selectFromGalery = () => {
+    ImagePicker.launchImageLibrary(options, (response) => {
+      const source = { uri: response.uri }
+      setPhoto(source)
+
+      console.log('fileSize', response.fileSize)
+    });
+  }
+
+  const openCameraTake = () => {
+    ImagePicker.launchCamera(options, (response) => {
+      const source = { uri: response.uri }
+      setPhoto(source)
+
+      console.log('fileSize', response.fileSize)
+    });
   }
 
   const renderImage = () => {
     if(photo === null) return null
 
     return (
-      <Image source={{uri: `data:${photoMime};base64,${photo}`}} style={styles.image}/>
+      <Image source={photo} style={styles.image}/>
     )
-  }
-
-  const renderSize = () => {
-    var size = photoSize
-    var txt = Math.round((size / 1024), 2)
-
-    return `Tamanho: ${txt} kb`
-  }
-
-  const actionSelectPhoto = (idx) => {
-    switch (idx) {
-      case 0:
-          openCameraTake()
-          break;
-      case 1:
-          selectFromGalery()
-          break;
-      case 2:
-          break;
-    }
   }
 
   return (
@@ -84,23 +79,13 @@ const App = () => {
         </View>        
         <View style={{paddingTop: 4}}>
           <Button title={'Open camera'} onPress={openCameraTake}/>
-        </View>
-        
+        </View>        
       </View>
-
-      <ActionSheet 
-        ref={ ev => refContainer = ev}
-        title={'Selecione uma opção'}
-        options={['Tirar foto', 'Escolher na galeria', 'Cancelar']}
-        cancelButtonIndex={2}
-        destructiveButtonIndex={2}
-        onPress={(index) => { actionSelectPhoto(index) }}/> 
 
       <View style={{flex: 5, marginTop: 60}}>
 
         { renderImage() }
 
-        <Text>{ renderSize() }</Text>
       </View>
 
     </View>
